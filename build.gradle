@@ -29,6 +29,12 @@ dependencies {
     testImplementation "org.testcontainers:postgresql:${versions.testcontainers}"
 }
 
+compileJava {
+    options.compilerArgs = [
+            '-Amapstruct.defaultComponentModel=spring'
+    ]
+}
+
 test {
     useJUnitPlatform()
 }
