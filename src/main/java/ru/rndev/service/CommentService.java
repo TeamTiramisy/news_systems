@@ -54,7 +54,8 @@ public class CommentService {
                 .orElseThrow(() -> new ResourceNotFoundException(Constant.FIELD_NAME_ID,
                         commentCreateDto.getNews_id(), Constant.ERROR_CODE));
 
-        return Optional.of(commentRepository.save(create(user, news, commentCreateDto.getText())))
+        return Optional.of(create(user, news, commentCreateDto.getText()))
+                .map(commentRepository::save)
                 .map(commentMapper::mapToDto)
                 .orElseThrow();
 
