@@ -19,6 +19,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation "org.mapstruct:mapstruct:${versions.mapstruct}"
+    implementation "com.google.code.gson:gson:${versions.gson}"
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.postgresql:postgresql'
 
