@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.rndev.dto.CommentCreateDto;
 import ru.rndev.dto.CommentDto;
@@ -30,19 +32,22 @@ public class CommentController {
     }
 
     @PostMapping
-    public ResponseEntity<CommentDto> save(@RequestBody CommentCreateDto commentCreateDto){
-        return new ResponseEntity<>(commentService.save(commentCreateDto), HttpStatus.CREATED);
+    public ResponseEntity<CommentDto> save(@RequestBody CommentCreateDto commentCreateDto,
+                                           @AuthenticationPrincipal UserDetails userDetails){
+        return new ResponseEntity<>(commentService.save(commentCreateDto, userDetails), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CommentDto> update(@PathVariable Integer id,
-                                             @RequestBody CommentUpdateDto commentUpdateDto){
-        return new ResponseEntity<>(commentService.update(id, commentUpdateDto), HttpStatus.OK);
+                                             @RequestBody CommentUpdateDto commentUpdateDto,
+                                             @AuthenticationPrincipal UserDetails userDetails){
+        return new ResponseEntity<>(commentService.update(id, commentUpdateDto, userDetails), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
-        commentService.delete(id);
+    public ResponseEntity<?> delete(@PathVariable Integer id,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        commentService.delete(id, userDetails);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

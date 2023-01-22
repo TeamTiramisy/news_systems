@@ -11,20 +11,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import ru.rndev.dto.*;
 import ru.rndev.entity.Comment;
 import ru.rndev.entity.News;
 import ru.rndev.entity.Role;
 import ru.rndev.entity.User;
+import ru.rndev.exception.NotAccessRightsException;
 import ru.rndev.exception.ResourceNotFoundException;
 import ru.rndev.mapper.CommentMapper;
 import ru.rndev.repository.CommentRepository;
-import ru.rndev.repository.NewsRepository;
-import ru.rndev.repository.UserRepository;
 import ru.rndev.util.Constant;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,10 +37,10 @@ class CommentServiceTest {
     private CommentRepository commentRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
-    private NewsRepository newsRepository;
+    private NewsService newsService;
 
     @Mock
     private CommentMapper commentMapper;
@@ -50,6 +51,7 @@ class CommentServiceTest {
     private Comment comment;
     private Comment commentCreate;
     private CommentDto commentDto;
+    private UserDetails userDetails;
     private CommentCreateDto commentCreateDto;
     private CommentUpdateDto commentUpdateDto;
     private User user;
@@ -61,8 +63,9 @@ class CommentServiceTest {
     void init(){
         comment = getComment();
         commentDto = getCommentDto();
-        commentCreate = getCommentCreate();
+        userDetails = getUserDetails();
         commentCreateDto = getCommentCreateDto();
+        commentCreate = getCommentCreate();
         commentUpdateDto = getCommentUpdateDto();
         pageable = PageRequest.of(Constant.PAGE, Constant.SIZE);
         comments = new PageImpl<>(Arrays.asList(comment));
@@ -95,27 +98,12 @@ class CommentServiceTest {
 
     @Test
     void saveTest() {
-        Mockito.when(userRepository.findByUsername(commentCreateDto.getUsername())).thenReturn(Optional.ofNullable(user));
-        Mockito.when(newsRepository.findById(commentCreateDto.getNews_id())).thenReturn(Optional.ofNullable(news));
+        Mockito.when(userService.getUser(Constant.TEST_USERNAME)).thenReturn(user);
+        Mockito.when(newsService.getNews(Constant.TEST_ID)).thenReturn(news);
         Mockito.when(commentRepository.save(commentCreate)).thenReturn(comment);
         Mockito.when(commentMapper.mapToDto(comment)).thenReturn(commentDto);
 
-        assertEquals(commentDto, commentService.save(commentCreateDto));
-    }
-
-    @Test
-    void saveExceptionUserTest() {
-        Mockito.when(userRepository.findByUsername(commentCreateDto.getUsername())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> commentService.save(commentCreateDto));
-    }
-
-    @Test
-    void saveExceptionNewsTest() {
-        Mockito.when(userRepository.findByUsername(commentCreateDto.getUsername())).thenReturn(Optional.ofNullable(user));
-        Mockito.when(newsRepository.findById(commentCreateDto.getNews_id())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> commentService.save(commentCreateDto));
+        assertEquals(commentDto, commentService.save(commentCreateDto, userDetails));
     }
 
     @Test
@@ -125,13 +113,20 @@ class CommentServiceTest {
         Mockito.when(commentRepository.saveAndFlush(comment)).thenReturn(comment);
         Mockito.when(commentMapper.mapToDto(comment)).thenReturn(commentDto);
 
-        assertEquals(commentDto, commentService.update(Constant.TEST_ID, commentUpdateDto));
+        assertEquals(commentDto, commentService.update(Constant.TEST_ID, commentUpdateDto, userDetails));
+    }
+
+    @Test
+    void updateExceptionTest(){
+        Mockito.when(commentRepository.findById(Constant.TEST_ID)).thenReturn(Optional.ofNullable(comment));
+
+        assertThrows(NotAccessRightsException.class, () -> commentService.update(Constant.TEST_ID, commentUpdateDto, getUserDetailsExc()));
     }
 
     @Test
     void deleteTest() {
         Mockito.when(commentRepository.findById(Constant.TEST_ID)).thenReturn(Optional.ofNullable(comment));
-        assertTrue(commentService.delete(Constant.TEST_ID));
+        assertTrue(commentService.delete(Constant.TEST_ID, userDetails));
         Mockito.verify(commentRepository, Mockito.times(1)).delete(comment);
     }
 
@@ -165,7 +160,6 @@ class CommentServiceTest {
     private CommentCreateDto getCommentCreateDto(){
         return CommentCreateDto.builder()
                 .text(Constant.TEST_TEXT)
-                .username(Constant.TEST_USERNAME)
                 .news_id(Constant.TEST_ID)
                 .build();
     }
@@ -180,6 +174,7 @@ class CommentServiceTest {
         return User.builder()
                 .id(Constant.TEST_ID)
                 .username(Constant.TEST_USERNAME)
+                .password(Constant.TEST_PASSWORD)
                 .firstname(Constant.TEST_FIRSTNAME)
                 .lastname(Constant.TEST_LASTNAME)
                 .role(Role.ADMIN)
@@ -202,7 +197,22 @@ class CommentServiceTest {
                 .date(LocalDateTime.now())
                 .title(Constant.TEST_TITLE)
                 .text(Constant.TEST_TEXT)
+                .user(getUser())
                 .build();
+    }
+
+    private UserDetails getUserDetails(){
+        return new org.springframework.security.core.userdetails.User(
+                Constant.TEST_USERNAME,
+                Constant.TEST_PASSWORD,
+                Collections.singleton(Role.ADMIN));
+    }
+
+    private UserDetails getUserDetailsExc(){
+        return new org.springframework.security.core.userdetails.User(
+                Constant.TEST_USERNAME_EMPTY,
+                Constant.TEST_PASSWORD,
+                Collections.singleton(Role.JOUR));
     }
 
 }

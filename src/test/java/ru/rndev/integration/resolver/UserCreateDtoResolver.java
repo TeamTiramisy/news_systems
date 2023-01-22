@@ -18,6 +18,7 @@ public class UserCreateDtoResolver implements ParameterResolver {
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         return UserCreateDto.builder()
                 .username(Constant.TEST_USERNAME)
+                .password(Constant.TEST_PASSWORD)
                 .firstname(Constant.TEST_FIRSTNAME)
                 .lastname(Constant.TEST_LASTNAME)
                 .role(Role.USER)

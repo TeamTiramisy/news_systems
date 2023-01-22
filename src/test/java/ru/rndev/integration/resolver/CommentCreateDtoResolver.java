@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import ru.rndev.dto.CommentCreateDto;
-import ru.rndev.dto.NewsCreateDto;
 import ru.rndev.util.Constant;
 
 public class CommentCreateDtoResolver implements ParameterResolver {
@@ -18,7 +17,6 @@ public class CommentCreateDtoResolver implements ParameterResolver {
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         return CommentCreateDto.builder()
                 .text(Constant.TEST_TEXT_CREATE)
-                .username(Constant.TEST_USERNAME_PRESENT)
                 .news_id(Constant.TEST_ID)
                 .build();
     }

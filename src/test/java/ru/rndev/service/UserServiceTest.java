@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import ru.rndev.dto.UserCreateDto;
 import ru.rndev.dto.UserDto;
 import ru.rndev.entity.Role;
@@ -21,6 +23,7 @@ import ru.rndev.repository.UserRepository;
 import ru.rndev.util.Constant;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,6 +42,7 @@ class UserServiceTest {
 
     private User user;
     private UserDto userDto;
+    private UserDetails userDetails;
     private UserCreateDto userCreateDto;
     private Pageable pageable;
     private Page<User> users;
@@ -47,6 +51,7 @@ class UserServiceTest {
     void init(){
         user = getUser();
         userDto = getUserDto();
+        userDetails = getUserDetails();
         userCreateDto = getUserCreateDto();
         pageable = PageRequest.of(Constant.PAGE, Constant.SIZE);
         users = new PageImpl<>(Arrays.asList(user));
@@ -116,10 +121,39 @@ class UserServiceTest {
         Mockito.verify(userRepository, Mockito.times(1)).delete(user);
     }
 
+    @Test
+    void getUserTest(){
+        Mockito.when(userRepository.findByUsername(Constant.TEST_USERNAME)).thenReturn(Optional.ofNullable(user));
+
+        assertEquals(user, userService.getUser(Constant.TEST_USERNAME));
+    }
+
+    @Test
+    void getUserExceptionTest(){
+        Mockito.when(userRepository.findByUsername(Constant.TEST_USERNAME)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> userService.getUser(Constant.TEST_USERNAME));
+    }
+
+    @Test
+    void loadUserByUsernameTest(){
+        Mockito.when(userRepository.findByUsername(Constant.TEST_USERNAME)).thenReturn(Optional.ofNullable(user));
+
+        assertEquals(userDetails, userService.loadUserByUsername(Constant.TEST_USERNAME));
+    }
+
+    @Test
+    void loadUserByUsernameExceptionTest(){
+        Mockito.when(userRepository.findByUsername(Constant.TEST_USERNAME)).thenReturn(Optional.empty());
+
+        assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername(Constant.TEST_USERNAME));
+    }
+
     private User getUser(){
         return User.builder()
                 .id(Constant.TEST_ID)
                 .username(Constant.TEST_USERNAME)
+                .password(Constant.TEST_PASSWORD)
                 .firstname(Constant.TEST_FIRSTNAME)
                 .lastname(Constant.TEST_LASTNAME)
                 .role(Role.ADMIN)
@@ -139,10 +173,18 @@ class UserServiceTest {
     private UserCreateDto getUserCreateDto(){
         return UserCreateDto.builder()
                 .username(Constant.TEST_USERNAME)
+                .password(Constant.TEST_PASSWORD)
                 .firstname(Constant.TEST_FIRSTNAME)
                 .lastname(Constant.TEST_LASTNAME)
                 .role(Role.ADMIN)
                 .build();
+    }
+
+    private UserDetails getUserDetails(){
+        return new org.springframework.security.core.userdetails.User(
+                Constant.TEST_USERNAME,
+                Constant.TEST_PASSWORD,
+                Collections.singleton(Role.ADMIN));
     }
 
 }

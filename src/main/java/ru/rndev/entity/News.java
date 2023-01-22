@@ -10,9 +10,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import java.time.LocalDateTime;
@@ -37,6 +39,10 @@ public class News {
     private String title;
 
     private String text;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private User user;
 
     @OneToMany(mappedBy = "news")
     @Builder.Default

@@ -18,6 +18,8 @@ public class NewsDto {
 
     String text;
 
+    UserDto user;
+
     List<CommentDto> comments;
 
 }

@@ -7,10 +7,10 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -37,6 +37,14 @@ class UserControllerTest extends TestBase {
         mockMvc.perform(MockMvcRequestBuilders.get(Constant.URL_USER))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(username = "ruslan@mail.ru", password = "123", authorities = {"USER"})
+    void findAllExceptionTest(){
+        mockMvc.perform(MockMvcRequestBuilders.get(Constant.URL_USER))
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
     @Test

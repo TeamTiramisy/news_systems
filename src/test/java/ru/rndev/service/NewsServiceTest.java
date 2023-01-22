@@ -8,10 +8,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.UserDetails;
 import ru.rndev.dto.NewsCreateDto;
 import ru.rndev.dto.NewsDto;
 import ru.rndev.dto.NewsFilter;
+import ru.rndev.dto.UserDto;
 import ru.rndev.entity.News;
+import ru.rndev.entity.Role;
+import ru.rndev.entity.User;
+import ru.rndev.exception.NotAccessRightsException;
 import ru.rndev.exception.ResourceNotFoundException;
 import ru.rndev.mapper.NewsMapper;
 import ru.rndev.repository.NewsRepository;
@@ -19,6 +24,7 @@ import ru.rndev.util.Constant;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,12 +38,17 @@ class NewsServiceTest {
     @Mock
     private NewsMapper newsMapper;
 
+    @Mock
+    private UserService userService;
+
     @InjectMocks
     private NewsService newsService;
 
     private News news;
+    private User user;
     private NewsDto newsDto;
     private NewsFilter newsFilter;
+    private UserDetails userDetails;
     private NewsCreateDto newsCreateDto;
     private Pageable pageable;
     private ExampleMatcher matcher;
@@ -46,8 +57,10 @@ class NewsServiceTest {
     @BeforeEach
     void init() {
         news = getNews();
+        user = getUser();
         newsDto = getNewsDto();
         newsFilter = getNewsFilter();
+        userDetails = getUserDetails();
         newsCreateDto = getNewsCreateDto();
         pageable = PageRequest.of(Constant.PAGE, Constant.SIZE);
         matcher = getMatcher();
@@ -82,10 +95,11 @@ class NewsServiceTest {
     @Test
     void saveTest(){
         Mockito.when(newsMapper.mapToEntity(newsCreateDto)).thenReturn(news);
+        Mockito.when(userService.getUser(Constant.TEST_USERNAME)).thenReturn(user);
         Mockito.when(newsRepository.save(news)).thenReturn(news);
         Mockito.when(newsMapper.mapToDto(news)).thenReturn(newsDto);
 
-        assertEquals(newsDto, newsService.save(newsCreateDto));
+        assertEquals(newsDto, newsService.save(newsCreateDto, userDetails));
     }
 
     @Test
@@ -95,13 +109,20 @@ class NewsServiceTest {
         Mockito.when(newsRepository.saveAndFlush(news)).thenReturn(news);
         Mockito.when(newsMapper.mapToDto(news)).thenReturn(newsDto);
 
-        assertEquals(newsDto, newsService.update(Constant.TEST_ID, newsCreateDto));
+        assertEquals(newsDto, newsService.update(Constant.TEST_ID, newsCreateDto, userDetails));
+    }
+
+    @Test
+    void updateExceptionTest(){
+        Mockito.when(newsRepository.findById(Constant.TEST_ID)).thenReturn(Optional.ofNullable(news));
+
+        assertThrows(NotAccessRightsException.class, () -> newsService.update(Constant.TEST_ID, newsCreateDto, getUserDetailsExc()));
     }
 
     @Test
     void deleteTest() {
         Mockito.when(newsRepository.findById(Constant.TEST_ID)).thenReturn(Optional.ofNullable(news));
-        assertTrue(newsService.delete(Constant.TEST_ID));
+        assertTrue(newsService.delete(Constant.TEST_ID, userDetails));
         Mockito.verify(newsRepository, Mockito.times(1)).delete(news);
     }
 
@@ -111,6 +132,7 @@ class NewsServiceTest {
                 .date(LocalDateTime.now())
                 .title(Constant.TEST_TITLE)
                 .text(Constant.TEST_TEXT)
+                .user(getUser())
                 .build();
     }
 
@@ -120,6 +142,7 @@ class NewsServiceTest {
                 .date(LocalDateTime.now())
                 .title(Constant.TEST_TITLE)
                 .text(Constant.TEST_TEXT)
+                .user(getUserDto())
                 .build();
     }
 
@@ -141,6 +164,41 @@ class NewsServiceTest {
         return ExampleMatcher.matching()
                 .withMatcher(Constant.FIELD_NAME_TITLE, ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
                 .withMatcher(Constant.FIELD_NAME_TEXT, ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
+    }
+
+    private User getUser(){
+        return User.builder()
+                .id(Constant.TEST_ID)
+                .username(Constant.TEST_USERNAME)
+                .password(Constant.TEST_PASSWORD)
+                .firstname(Constant.TEST_FIRSTNAME)
+                .lastname(Constant.TEST_LASTNAME)
+                .role(Role.ADMIN)
+                .build();
+    }
+
+    private UserDto getUserDto(){
+        return UserDto.builder()
+                .id(Constant.TEST_ID)
+                .username(Constant.TEST_USERNAME)
+                .firstname(Constant.TEST_FIRSTNAME)
+                .lastname(Constant.TEST_LASTNAME)
+                .role(Role.ADMIN)
+                .build();
+    }
+
+    private UserDetails getUserDetails(){
+        return new org.springframework.security.core.userdetails.User(
+                Constant.TEST_USERNAME,
+                Constant.TEST_PASSWORD,
+                Collections.singleton(Role.ADMIN));
+    }
+
+    private UserDetails getUserDetailsExc(){
+        return new org.springframework.security.core.userdetails.User(
+                Constant.TEST_USERNAME,
+                Constant.TEST_PASSWORD,
+                Collections.singleton(Role.USER));
     }
 
 }

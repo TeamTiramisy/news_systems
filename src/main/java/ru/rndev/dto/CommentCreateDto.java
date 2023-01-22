@@ -16,8 +16,6 @@ public class CommentCreateDto {
 
     String text;
 
-    String username;
-
     Integer news_id;
 
 }

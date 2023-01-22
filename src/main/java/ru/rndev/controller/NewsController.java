@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.rndev.dto.NewsCreateDto;
 import ru.rndev.dto.NewsDto;
@@ -30,19 +32,22 @@ public class NewsController {
     }
 
     @PostMapping
-    public ResponseEntity<NewsDto> save(@RequestBody NewsCreateDto newsCreateDto){
-        return new ResponseEntity<>(newsService.save(newsCreateDto), HttpStatus.CREATED);
+    public ResponseEntity<NewsDto> save(@RequestBody NewsCreateDto newsCreateDto,
+                                        @AuthenticationPrincipal UserDetails userDetails){
+        return new ResponseEntity<>(newsService.save(newsCreateDto, userDetails), HttpStatus.CREATED);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<NewsDto> update(@PathVariable Integer id,
-                                          @RequestBody NewsCreateDto newsCreateDto){
-        return new ResponseEntity<>(newsService.update(id, newsCreateDto), HttpStatus.OK);
+                                          @RequestBody NewsCreateDto newsCreateDto,
+                                          @AuthenticationPrincipal UserDetails userDetails){
+        return new ResponseEntity<>(newsService.update(id, newsCreateDto, userDetails), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
-        newsService.delete(id);
+    public ResponseEntity<?> delete(@PathVariable Integer id,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        newsService.delete(id, userDetails);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

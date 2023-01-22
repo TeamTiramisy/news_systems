@@ -7,15 +7,16 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.rndev.dto.CommentCreateDto;
 import ru.rndev.dto.CommentUpdateDto;
+import ru.rndev.exception.NotAccessRightsException;
 import ru.rndev.exception.ResourceNotFoundException;
 import ru.rndev.integration.TestBase;
 import ru.rndev.integration.resolver.CommentCreateDtoResolver;
@@ -83,6 +84,18 @@ class CommentControllerTest extends TestBase {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath(Constant.PATH_TEXT, Matchers.is(Constant.TEST_TITLE_CREATE)))
                 .andExpect(MockMvcResultMatchers.jsonPath(Constant.PATH_USER_ID, Matchers.is(Constant.TEST_ID)));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(username = "petr@mail.ru", password = "123", authorities = {"USER"})
+    void updateExceptionTest(CommentUpdateDto commentUpdateDto){
+        mockMvc.perform(MockMvcRequestBuilders.put(Constant.URL_COMMENT_ID, Constant.TEST_ID)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                        .content(gson.toJson(commentUpdateDto)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof NotAccessRightsException))
+                .andExpect(result -> Assertions.assertEquals(result.getResolvedException().getMessage(), Constant.AUTHOR_EXCEPTION));
     }
 
     @Test

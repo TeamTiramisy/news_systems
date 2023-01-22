@@ -33,12 +33,19 @@ public class User {
 
     private String username;
 
+    private String password;
+
     private String firstname;
 
     private String lastname;
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user")
+    @Builder.Default
+    @ToString.Exclude
+    private List<News> news = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     @Builder.Default

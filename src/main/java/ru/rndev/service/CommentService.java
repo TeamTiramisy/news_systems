@@ -2,6 +2,7 @@ package ru.rndev.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.rndev.dto.CommentCreateDto;
@@ -9,12 +10,12 @@ import ru.rndev.dto.CommentDto;
 import ru.rndev.dto.CommentUpdateDto;
 import ru.rndev.entity.Comment;
 import ru.rndev.entity.News;
+import ru.rndev.entity.Role;
 import ru.rndev.entity.User;
+import ru.rndev.exception.NotAccessRightsException;
 import ru.rndev.exception.ResourceNotFoundException;
 import ru.rndev.mapper.CommentMapper;
 import ru.rndev.repository.CommentRepository;
-import ru.rndev.repository.NewsRepository;
-import ru.rndev.repository.UserRepository;
 import ru.rndev.util.Constant;
 
 import java.util.List;
@@ -28,8 +29,8 @@ import static java.util.stream.Collectors.toList;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
-    private final NewsRepository newsRepository;
+    private final UserService userService;
+    private final NewsService newsService;
     private final CommentMapper commentMapper;
 
     public List<CommentDto> findAll(Pageable pageable) {
@@ -45,16 +46,10 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentDto save(CommentCreateDto commentCreateDto){
-        User user = userRepository.findByUsername(commentCreateDto.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException(Constant.FIELD_NAME_USERNAME,
-                        commentCreateDto.getUsername(), Constant.ERROR_CODE));
-
-        News news = newsRepository.findById(commentCreateDto.getNews_id())
-                .orElseThrow(() -> new ResourceNotFoundException(Constant.FIELD_NAME_ID,
-                        commentCreateDto.getNews_id(), Constant.ERROR_CODE));
-
-        return Optional.of(create(user, news, commentCreateDto.getText()))
+    public CommentDto save(CommentCreateDto commentCreateDto, UserDetails userDetails){
+        return Optional.of(create(userService.getUser(userDetails.getUsername()),
+                        newsService.getNews(commentCreateDto.getNews_id()),
+                        commentCreateDto.getText()))
                 .map(commentRepository::save)
                 .map(commentMapper::mapToDto)
                 .orElseThrow();
@@ -62,8 +57,9 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentDto update(Integer id, CommentUpdateDto commentUpdateDto){
+    public CommentDto update(Integer id, CommentUpdateDto commentUpdateDto, UserDetails userDetails){
         return commentRepository.findById(id)
+                .map(comment -> getAuthorize(comment, userDetails))
                 .map(comment -> commentMapper.mapToUpdate(comment, commentUpdateDto))
                 .map(commentRepository::saveAndFlush)
                 .map(commentMapper::mapToDto)
@@ -71,8 +67,9 @@ public class CommentService {
     }
 
     @Transactional
-    public boolean delete(Integer id){
+    public boolean delete(Integer id, UserDetails userDetails){
         return commentRepository.findById(id)
+                .map(comment -> getAuthorize(comment, userDetails))
                 .map(comment -> {
                     commentRepository.delete(comment);
                     return true;
@@ -86,6 +83,16 @@ public class CommentService {
                 .user(user)
                 .news(news)
                 .build();
+    }
+
+    private Comment getAuthorize(Comment comment, UserDetails userDetails) {
+        if (!userDetails.getUsername().equals(comment.getUser().getUsername())) {
+            if (!userDetails.getAuthorities().contains(Role.ADMIN)) {
+                throw new NotAccessRightsException(Constant.AUTH_ERROR_CODE);
+            }
+        }
+
+        return comment;
     }
 
 }

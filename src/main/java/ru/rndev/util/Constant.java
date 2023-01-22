@@ -7,6 +7,7 @@ public class Constant {
 
     public static final String EXCEPTION_MESSAGE = "Requested resource not found (%s = %s)";
     public static final Integer ERROR_CODE = 40401;
+    public static final Integer AUTH_ERROR_CODE = 40403;
     public static final String FIELD_NAME_ID = "id";
     public static final String FIELD_NAME_USERNAME = "username";
     public static final String FIELD_NAME_TITLE = "title";
@@ -26,6 +27,7 @@ public class Constant {
     public static final String TEST_USERNAME_EMPTY = "test@mail.ru";
     public static final String TEST_FIRSTNAME = "Alex";
     public static final String TEST_LASTNAME = "Ivanov";
+    public static final String TEST_PASSWORD = "123";
     public static final String URL_USER = "/v1/users";
     public static final String URL_USER_ID = "/v1/users/{id}";
     public static final String URL_NEWS = "/v1/news";
@@ -42,5 +44,7 @@ public class Constant {
     public static final String PATH_USER_ID = "$.user.id";
     public static final Integer TEST_FAILED_ID = 100;
     public static final String COMMENT = "Cool";
+    public static final String AUTH_EXCEPTION = "Failed to retrieve user: ";
+    public static final String AUTHOR_EXCEPTION = "The user does not have access rights";
 
 }
