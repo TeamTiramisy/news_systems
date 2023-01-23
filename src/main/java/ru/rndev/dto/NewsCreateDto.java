@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Builder;
 import lombok.experimental.FieldDefaults;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,8 +17,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NewsCreateDto {
 
+    @NotBlank
     String title;
 
+    @NotBlank
     String text;
 
 }

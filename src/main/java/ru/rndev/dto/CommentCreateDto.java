@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Builder;
 import lombok.experimental.FieldDefaults;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,8 +17,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentCreateDto {
 
+    @NotBlank
     String text;
 
+    @Positive
     Integer news_id;
 
 }

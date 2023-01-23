@@ -6,6 +6,7 @@ import lombok.experimental.UtilityClass;
 public class Constant {
 
     public static final String EXCEPTION_MESSAGE = "Requested resource not found (%s = %s)";
+    public static final Integer ERROR_CODE_VALID = 40400;
     public static final Integer ERROR_CODE = 40401;
     public static final Integer AUTH_ERROR_CODE = 40403;
     public static final String FIELD_NAME_ID = "id";
