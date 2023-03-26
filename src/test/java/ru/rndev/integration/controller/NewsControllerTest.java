@@ -4,8 +4,7 @@ import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +23,7 @@ import ru.rndev.util.Constant;
 @AutoConfigureMockMvc
 @RequiredArgsConstructor
 @ExtendWith(NewsCreateDtoResolver.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class NewsControllerTest extends TestBase {
 
     private final MockMvc mockMvc;

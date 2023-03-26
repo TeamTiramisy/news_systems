@@ -1,6 +1,10 @@
 package ru.rndev.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -25,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "comment")
 @Transactional(readOnly = true)
 public class CommentService {
 
@@ -39,6 +44,7 @@ public class CommentService {
                 .collect(toList());
     }
 
+    @Cacheable
     public CommentDto findById(Integer id){
         return commentRepository.findById(id)
                 .map(commentMapper::mapToDto)
@@ -56,6 +62,7 @@ public class CommentService {
 
     }
 
+    @CachePut(key = "#id")
     @Transactional
     public CommentDto update(Integer id, CommentUpdateDto commentUpdateDto, UserDetails userDetails){
         return commentRepository.findById(id)
@@ -66,6 +73,7 @@ public class CommentService {
                 .orElseThrow(() -> new ResourceNotFoundException(Constant.FIELD_NAME_ID, id, Constant.ERROR_CODE));
     }
 
+    @CacheEvict(key = "#id")
     @Transactional
     public boolean delete(Integer id, UserDetails userDetails){
         return commentRepository.findById(id)

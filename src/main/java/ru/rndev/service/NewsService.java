@@ -1,6 +1,10 @@
 package ru.rndev.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +30,7 @@ import static java.util.stream.Collectors.*;
 
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "news")
 @Transactional(readOnly = true)
 public class NewsService {
 
@@ -47,6 +52,7 @@ public class NewsService {
                 .collect(toList());
     }
 
+    @Cacheable
     public NewsDto findById(Integer id) {
         return newsRepository.findById(id)
                 .map(newsMapper::mapToDto)
@@ -67,6 +73,7 @@ public class NewsService {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'JOUR')")
+    @CachePut(key = "#id")
     @Transactional
     public NewsDto update(Integer id, NewsCreateDto newsCreateDto, UserDetails userDetails) {
         return newsRepository.findById(id)
@@ -78,6 +85,7 @@ public class NewsService {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'JOUR')")
+    @CacheEvict(key = "#id")
     @Transactional
     public boolean delete(Integer id, UserDetails userDetails) {
         return newsRepository.findById(id)
@@ -106,3 +114,4 @@ public class NewsService {
     }
 
 }
+

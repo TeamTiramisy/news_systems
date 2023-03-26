@@ -47,5 +47,7 @@ public class Constant {
     public static final String COMMENT = "Cool";
     public static final String AUTH_EXCEPTION = "Failed to retrieve user: ";
     public static final String AUTHOR_EXCEPTION = "The user does not have access rights";
+    public static final Integer MAX_SIZE = 1000;
+    public static final Integer EXPIRE_AFTER_WRITE = 30;
 
 }

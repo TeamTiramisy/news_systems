@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor
 @ExtendWith(CommentCreateDtoResolver.class)
 @ExtendWith(CommentUpdateDtoResolver.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class CommentControllerTest extends TestBase {
 
     private final MockMvc mockMvc;
