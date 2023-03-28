@@ -1,2 +1,4 @@
-rootProject.name = 'news'
+rootProject.name = 'news_systems'
+
+include 'news'
 
