@@ -1,4 +1,5 @@
 rootProject.name = 'news_systems'
 
 include 'news'
+include 'news_config'
 

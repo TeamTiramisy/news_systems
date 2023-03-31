@@ -1,22 +1,4 @@
 spring:
 
-  datasource:
-    url: jdbc:postgresql://localhost:5433/news_system
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    properties.hibernate:
-      show_sql: true
-      format_sql: true
-      hbm2ddl.auto: validate
-    open-in-view: false
-
-    hibernate:
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-
-server:
-  servlet:
-    context-path: /api
+  config:
+    import: optional:configserver:http://localhost:8888

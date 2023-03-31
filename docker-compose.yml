@@ -1,17 +1,25 @@
 services:
 
+  config:
+    build: /news_config
+    ports:
+      - 8888:8888
+
   news:
-    build: .
+    build: /news
     environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config:8888
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
     ports:
       - 8080:8080
     depends_on:
+      - config
       - postgres
+
   postgres:
     image: postgres:14.4
     ports:
-      - 5433:5432
+      - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
