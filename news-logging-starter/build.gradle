@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+    id "io.freefair.lombok" version "6.3.0"
+}
+
+apply from: 'version.gradle'
+
+group = 'ru.rndev'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-aop:${versions}"
+    implementation "org.springframework.boot:spring-boot-starter-web:${versions}"
+
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${versions}"
+}

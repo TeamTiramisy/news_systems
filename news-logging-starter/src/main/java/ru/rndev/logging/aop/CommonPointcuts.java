@@ -1,22 +1,20 @@
-package ru.rndev.aop;
+package ru.rndev.logging.aop;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.stereotype.Component;
 
 @Aspect
-@Component
 public class CommonPointcuts {
 
-    @Pointcut("within(ru.rndev.service.*Service)")
+    @Pointcut("within(ru.rndev.*.*Service)")
     public void isServiceLayer() {
     }
 
-    @Pointcut("within(ru.rndev.controller.*Controller)")
+    @Pointcut("within(ru.rndev.*.*Controller)")
     public void isControllerLayer() {
     }
 
-    @Pointcut("within(ru.rndev.handler.*Handler)")
+    @Pointcut("within(ru.rndev.*.*Handler)")
     public void isHandlerLayer() {
     }
 
