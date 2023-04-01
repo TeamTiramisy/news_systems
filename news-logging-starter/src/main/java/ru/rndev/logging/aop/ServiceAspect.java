@@ -11,11 +11,11 @@ public class ServiceAspect {
 
     @Around("ru.rndev.logging.aop.CommonPointcuts.isServiceLayer()")
     public Object addLogging(ProceedingJoinPoint joinPoint) throws Throwable {
-        log.info("invoked method {} in {}, with args {}",
+        log.debug("invoked method {} in {}, with args {}",
                 joinPoint.getSignature().getName(), joinPoint.getTarget().getClass(), joinPoint.getArgs());
         try {
             Object result = joinPoint.proceed();
-            log.info("invoked method {} in {}, result {}",
+            log.debug("invoked method {} in {}, result {}",
                     joinPoint.getSignature().getName(), joinPoint.getTarget().getClass(), result);
             return result;
         } catch (Throwable exception){
@@ -23,7 +23,7 @@ public class ServiceAspect {
                     joinPoint.getSignature().getName(), joinPoint.getTarget().getClass(), exception.getClass(), exception.getMessage());
             throw exception;
         } finally {
-            log.info("invoked method {} in {}", joinPoint.getSignature().getName(), joinPoint.getTarget().getClass());
+            log.debug("invoked method {} in {}", joinPoint.getSignature().getName(), joinPoint.getTarget().getClass());
         }
     }
 
